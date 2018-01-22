@@ -33,7 +33,7 @@ class client(object):
         return self.__connected
     def getclientsoc(self):
         return self.__client
-    def __connect(self):
+    def connect(self):
         self.__client.connect(self.__server_addr)
         #self.__client.setblocking(ClientConfig.CONN_TIMEOUT) # sets the time out for blocking operations of the socket
         data = self.__client.recv(ClientConfig.CONN_CONFIRM_SIZE) # get connection confirmation and id from server
@@ -49,6 +49,7 @@ class client(object):
         self.__id = None
     def __recv(self,size = 1024):
         data = self.__client.recv(size)
+        print data.split('$')
         src , msg = data.split('$')
         return src + ':' + msg
     def __send(self,msg,soc_id):
@@ -56,7 +57,6 @@ class client(object):
     def run(self):
         while self.__alive:
             #self.__client.setblocking(0)
-            self.__connect()
             readables , writables , exceptionals = select.select([self.__client],[self.__client],[self.__client])
             if self.isConnected():
                 if len(readables):
@@ -73,4 +73,5 @@ def start():
 """
 if __name__ == "__main__":
     c = client()
+    c.connect()
     c.run()

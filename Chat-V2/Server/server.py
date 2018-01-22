@@ -1,4 +1,4 @@
-import socket,select,ServerConfig,Queue
+import socket,select,ServerConfig
 """
 Protocol Description:
 every client assigned unique id when connecting
@@ -20,8 +20,9 @@ class server(object):
         self.__connections = {0:self.__server}
         self.__next_id = 0
         self.__alive = True
-        self.__msg_queue = Queue.Queue(10)
+        #self.__msg_queue = Queue.Queue(10)
         #self.__server.setblocking(ServerConfig.CONN_TIMEOUT)
+        self.__msg_lst = []
     def getaddr(self):
         return self.__addr
     def __getnextid(self):
@@ -41,9 +42,9 @@ class server(object):
             print("shit")
             return True
     def __push_msg(self,msg):
-        self.__msg_queue.put(msg)
-    def __pop_msg(self):
-        return self.__msg_queue.get()
+        self.__msg_lst.append(msg)
+    # def __pop_msg(self):
+    #     return self.__msg_queue.get()
     def __wrap_msg(self,src,data):
         splt = data.split('$')
         print splt
@@ -51,8 +52,8 @@ class server(object):
         print msg
         return msg# format - (int: src id , int: dst id, str: msg)
     def __format_msg(self,msg):
-        src , _ , msg = msg
-        return str(src) + '$' + msg
+        src , _ , m = msg
+        return str(src) + '$' + m
     def __handle_conn(self):
         #self.__server.setblocking(ServerConfig.CONN_TIMEOUT)
         soc , addr = self.__server.accept()
@@ -72,14 +73,13 @@ class server(object):
         else:
             if self.__isValid(data):
                 self.__push_msg(self.__wrap_msg(soc_id,data))
-    def __handle_outcome(self):
-        print self.__msg_queue.maxsize
-        msg = self.__pop_msg()
-        print msg
-        print type(msg)
-        _,dst_id,_ = msg
-        dst_soc = self.__connections[dst_id]
-        dst_soc.send(self.__format_msg(msg))
+    def __handle_outcome(self,soc):
+        soc_id = self.__connections.keys()[self.__connections.values().index(soc)]
+        for m in self.__msg_lst:
+            _,dst_id,_ = m
+            if soc_id == dst_id:
+                soc = self.__connections[dst_id]
+                soc.send(self.__format_msg(m))
     def run(self):
         #self.__server.setblocking(0)
         while self.__alive:
@@ -92,8 +92,8 @@ class server(object):
                     else:
                         self.__handle_income(soc)
             if len(writables):
-                while not self.__msg_queue.empty():
-                    self.__handle_outcome()
+                for soc in writables:
+                    self.__handle_outcome(soc)
 
 if __name__ == "__main__":
     s = server()
