@@ -39,7 +39,6 @@ class server(object):
         try:
             return (type(int(splt[0])) is int and type(splt[1]) is str)
         except:
-            print("shit")
             return True
     def __push_msg(self,msg):
         self.__msg_lst.append(msg)
@@ -47,9 +46,7 @@ class server(object):
     #     return self.__msg_queue.get()
     def __wrap_msg(self,src,data):
         splt = data.split('$')
-        print splt
         msg = (src,int(splt[0]),splt[1])
-        print msg
         return msg# format - (int: src id , int: dst id, str: msg)
     def __format_msg(self,msg):
         src , _ , m = msg
@@ -66,7 +63,6 @@ class server(object):
         del self.__connections[id]
     def __handle_income(self,soc):
         data = soc.recv(ServerConfig.RECV_SIZE)
-        print data + 'h'
         soc_id = self.__connections.keys()[self.__connections.values().index(soc)]
         if not data:
             self.__handle_close(soc_id)
@@ -80,6 +76,7 @@ class server(object):
             if soc_id == dst_id:
                 soc = self.__connections[dst_id]
                 soc.send(self.__format_msg(m))
+                self.__msg_lst.remove(m)
     def run(self):
         #self.__server.setblocking(0)
         while self.__alive:

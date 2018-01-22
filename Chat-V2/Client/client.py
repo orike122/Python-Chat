@@ -10,6 +10,7 @@ client --------> server - close request
 """
 class client(object):
     def __init__(self):
+        self.__writables = 1
         self.__id = None
         self.__server_ip = ClientConfig.SERVER_IP
         self.__server_port = ClientConfig.SERVER_PORT
@@ -49,23 +50,25 @@ class client(object):
         self.__id = None
     def __recv(self,size = 1024):
         data = self.__client.recv(size)
-        print data.split('$')
         src , msg = data.split('$')
         return src + ':' + msg
-    def __send(self,msg,soc_id):
-        self.__client.send(str(soc_id) +'$'+ msg)
+    def __send(self):
+        while self.__alive:
+            if self.__writables:
+                msg = raw_input("Enter message: ")
+                soc_id = msg[0]
+                msg = msg[1:]
+                self.__client.send(soc_id +'$'+ msg)
     def run(self):
+        input_thread = threading.Thread(target = self.__send)
+        input_thread.start()
         while self.__alive:
             #self.__client.setblocking(0)
-            readables , writables , exceptionals = select.select([self.__client],[self.__client],[self.__client])
+            self.__readables , self.__writables , exceptionals = select.select([self.__client],[self.__client],[self.__client])
             if self.isConnected():
-                if len(readables):
-                    print self.__recv()
-                print writables,readables
-                if len(writables): #and self.__buffer is not None:
-                    #soc_id = self.__buffer[0]
-                    self.__send("hi",1)#self.__buffer)
-                    #self.__buffer = None
+                if len(self.__readables):
+                    print '\t'+self.__recv()
+            
 """
 c = client()
 def start():
