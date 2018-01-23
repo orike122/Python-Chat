@@ -1,4 +1,5 @@
 import socket,select,ServerConfig
+__author__ = "Cyben AKA as Benash, orike122 AKA as the guy with no cool nicknames(like Cyben)"
 """
 Protocol Description:
 every client assigned unique id when connecting
@@ -20,8 +21,6 @@ class server(object):
         self.__connections = {0:self.__server}
         self.__next_id = 0
         self.__alive = True
-        #self.__msg_queue = Queue.Queue(10)
-        #self.__server.setblocking(ServerConfig.CONN_TIMEOUT)
         self.__msg_lst = []
     def getaddr(self):
         return self.__addr
@@ -42,8 +41,6 @@ class server(object):
             return True
     def __push_msg(self,msg):
         self.__msg_lst.append(msg)
-    # def __pop_msg(self):
-    #     return self.__msg_queue.get()
     def __wrap_msg(self,src,data):
         splt = data.split('$')
         msg = (src,int(splt[0]),splt[1])
@@ -52,9 +49,7 @@ class server(object):
         src , _ , m = msg
         return str(src) + '$' + m
     def __handle_conn(self):
-        #self.__server.setblocking(ServerConfig.CONN_TIMEOUT)
         soc , addr = self.__server.accept()
-        #self.__server.setblocking(1)
         soc_id = self.__getnextid()
         self.__connections[soc_id] = soc
         soc.send(ServerConfig.CONN_CONFIRM + '$' + str(soc_id))
@@ -78,7 +73,6 @@ class server(object):
                 soc.send(self.__format_msg(m))
                 self.__msg_lst.remove(m)
     def run(self):
-        #self.__server.setblocking(0)
         while self.__alive:
             inputs = self.__connections.values()
             readables , writables , exceptionals = select.select(inputs, inputs, inputs)
