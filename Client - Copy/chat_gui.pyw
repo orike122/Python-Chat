@@ -129,14 +129,23 @@ class Client:
         to_remove = [k for k in self.cur_lst if k not in self.__online_cl.values()]
         to_add = [k for k in self.__online_cl.values() if k not in self.cur_lst]
         #remove
-        to_remove.append(sys.argv[1])
+        
+        
+        
         #add
+        
         for k in to_add:
             self.clientlst.insert(END,k)
             self.cur_lst.append(k)
+
+        
+        
         for k in to_remove:
-            self.clientlst.delete(self.cur_lst.index(k))
-            self.cur_lst.remove(k)
+            try:
+                self.clientlst.delete(self.cur_lst.index(k))            
+                self.cur_lst.remove(k)    
+            except:
+                print "bla"
             
         #print "\naharey:" , self.__client.getaliveclients()
     def remove_names(self):
@@ -389,7 +398,7 @@ class ScrolledListBox(AutoScroll, Listbox):
         AutoScroll.__init__(self, master)
 
 if __name__ == '__main__':
-    sys.argv = ["chat_gui.pyw","ori"]
+    sys.argv = ["chat_gui.pyw","ben"]
     vp_start_gui()
 
 

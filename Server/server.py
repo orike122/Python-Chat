@@ -71,7 +71,8 @@ class server(object):
     def __id_to_soc(self,soc_id):
         return self.__connections[int(soc_id)]
     def __sendls(self,soc):
-        send_msg = "&"+'$'.join(self.__connectedName.keys())+"*"+'$'.join(self.__connectedName.values())
+        dic = self.__connectedName.copy()
+        send_msg = "&"+'$'.join(dic.keys())+"*"+'$'.join(dic.values())
         print send_msg
         soc.send(send_msg)
         """
@@ -95,6 +96,10 @@ class server(object):
         data = soc.recv(ServerConfig.RECV_SIZE)
         print data
         soc_id = self.__connections.keys()[self.__connections.values().index(soc)]
+        if data[0] == "~":
+            if self.__isValid(data[1:]):
+                for soc_id in self.__connections.keys():
+                    self.__push_msg(self.__wrap_msg(soc_id,data[1:]))
         if data == "BYE":
             self.__handle_close(soc_id)
             return

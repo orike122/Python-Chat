@@ -78,6 +78,7 @@ class Client:
             if not ok:print "error"
             return ok
     def conn_btn_event(self):
+        global name
         ip,port = self.ip_tb.get(),self.ip_tb1.get()
         if self.isvalid(val = (ip,port),mode = 'addr'):
             self.__client.setname(sys.argv[1])
@@ -124,19 +125,17 @@ class Client:
             self.__client.make_aDir(id)
             self.__lenofcl = len(self.cur_lst)
     def update_names(self):
-        
         self.__online_cl = self.__client.get_aliveClients()
         to_remove = [k for k in self.cur_lst if k not in self.__online_cl.values()]
         to_add = [k for k in self.__online_cl.values() if k not in self.cur_lst]
         #remove
-        to_remove.append(sys.argv[1])
+        for k in to_remove:
+            self.clientlst.delete(self.cur_lst.index(k))
+            self.cur_lst.remove(k)
         #add
         for k in to_add:
             self.clientlst.insert(END,k)
             self.cur_lst.append(k)
-        for k in to_remove:
-            self.clientlst.delete(self.cur_lst.index(k))
-            self.cur_lst.remove(k)
             
         #print "\naharey:" , self.__client.getaliveclients()
     def remove_names(self):
@@ -191,7 +190,7 @@ class Client:
             [('selected', _compcolor), ('active',_ana2color)])
 
         top.geometry("500x600+426+71")
-        top.title("Client - %s"%sys.argv[1])
+        top.title("Client")
 
 
 
@@ -389,7 +388,6 @@ class ScrolledListBox(AutoScroll, Listbox):
         AutoScroll.__init__(self, master)
 
 if __name__ == '__main__':
-    sys.argv = ["chat_gui.pyw","ori"]
     vp_start_gui()
 
 
