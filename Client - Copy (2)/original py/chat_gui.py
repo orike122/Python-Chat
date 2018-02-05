@@ -78,6 +78,7 @@ class Client:
             if not ok:print "error"
             return ok
     def conn_btn_event(self):
+        global name
         ip,port = self.ip_tb.get(),self.ip_tb1.get()
         if self.isvalid(val = (ip,port),mode = 'addr'):
             self.__client.setname(sys.argv[1])
@@ -124,25 +125,17 @@ class Client:
             self.__client.make_aDir(id)
             self.__lenofcl = len(self.cur_lst)
     def update_names(self):
-        
         self.__online_cl = self.__client.get_aliveClients()
         to_remove = [k for k in self.cur_lst if k not in self.__online_cl.values()]
         to_add = [k for k in self.__online_cl.values() if k not in self.cur_lst]
         #remove
-
+        for k in to_remove:
+            self.clientlst.delete(self.cur_lst.index(k))
+            self.cur_lst.remove(k)
         #add
         for k in to_add:
             self.clientlst.insert(END,k)
             self.cur_lst.append(k)
-
-        
-        
-        for k in to_remove:
-            try:
-                self.clientlst.delete(self.cur_lst.index(k))            
-                self.cur_lst.remove(k)    
-            except:
-                print "bla"
             
         #print "\naharey:" , self.__client.getaliveclients()
     def remove_names(self):
@@ -153,17 +146,16 @@ class Client:
 
 
     def chatread(self):
-##        if len(self.__selected_cl):
-##            name = self.clientlst.get(self.__selected_cl)
-##            soc_id = self.__client.get_aliveClients().keys()[self.__client.get_aliveClients().values().index(name)]
-##            file_text = ""
-        with open('History.txt','r+') as chat:
-            file_text = chat.read()
-            
-            if len(file_text) > self.__last_len:
+        if len(self.__selected_cl):
+            name = self.clientlst.get(self.__selected_cl)
+            soc_id = self.__client.get_aliveClients().keys()[self.__client.get_aliveClients().values().index(name)]
+            file_text = ""
+            with open(self.__client.filePath+'%s.txt'%str(soc_id),'r+') as chat:
+                file_text = chat.read()
+
+            if file_text != self.chat.get(1.0,END):
                 self.chat.delete('1.0',END)
                 self.chat.insert('end',"\n"+file_text)
-                self.__last_len = len(file_text)
              
             
     def run(self):
@@ -182,7 +174,6 @@ class Client:
         self.__online_cl = {}
         self.__selected_cl = ''
         self.__msgvar = StringVar()
-        self.__last_len = 0
         '''This class configures and populates the toplevel window.
            top is the toplevel containing window.'''
         _bgcolor = '#d9d9d9'  # X11 color: 'gray85'
@@ -199,7 +190,7 @@ class Client:
             [('selected', _compcolor), ('active',_ana2color)])
 
         top.geometry("500x600+426+71")
-        top.title("Client - %s"%sys.argv[1])
+        top.title("Client")
 
 
 
@@ -397,7 +388,6 @@ class ScrolledListBox(AutoScroll, Listbox):
         AutoScroll.__init__(self, master)
 
 if __name__ == '__main__':
-    sys.argv = ["chat_gui.pyw","ben"]
     vp_start_gui()
 
 

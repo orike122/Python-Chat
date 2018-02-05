@@ -60,7 +60,7 @@ class client(object):
             self.make_aDir(soc_id)   
         
     def make_aDir(self,soc_id):
-        with open('History.txt','w+') as his:
+        with open(self.filePath+'%s.txt'%str(soc_id),'w') as his:
             his.write("")
 
     def __getList_Clients(self,msg):
@@ -89,10 +89,11 @@ class client(object):
     def send(self,soc_id,msg):
         if self.__writables:
             self.__client.send(soc_id +'$'+ msg)
-            with open('History.txt','a+') as his:
-                his.write('\n Me:'+msg)
+            with open(self.filePath+'%s.txt'%str(soc_id),'a+') as his:
+                his.write('\n'+msg)
               
     def recv(self):
+        
         if self.isConnected():
             if len(self.__readables):
                 print "recvd"
@@ -102,8 +103,8 @@ class client(object):
                     print "\n"
                     print messg
                     soc_id, msg = messg.split('$')
-                    with open('History.txt','a+') as his:
-                        his.write('\n %s: %s'%(self.__aliveClients[soc_id],msg))
+                    with open(self.filePath+'%s.txt'%str(soc_id),'a+') as his:
+                        his.write('\n'+msg)
                 else:
                     print "\n"
                     print "got msg"

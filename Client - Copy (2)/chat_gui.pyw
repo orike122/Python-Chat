@@ -397,7 +397,7 @@ class ScrolledListBox(AutoScroll, Listbox):
         AutoScroll.__init__(self, master)
 
 if __name__ == '__main__':
-    sys.argv = ["chat_gui.pyw","ben"]
+    sys.argv = ["chat_gui.pyw","Toby"]
     vp_start_gui()
 
 
