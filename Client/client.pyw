@@ -88,7 +88,8 @@ class client(object):
         self.__init__()
     def send(self,soc_id,msg):
         if self.__writables:
-            self.__client.send(soc_id +'$'+ msg)
+            self.__client.send(str(soc_id) +'$'+ msg)
+            print str(soc_id) +'$'+ msg
             with open('History.txt','a+') as his:
                 his.write('\n Me:'+msg)
               
@@ -112,5 +113,8 @@ class client(object):
                     
     def run(self):
         
-        self.__readables , self.__writables , exceptionals = select.select([self.__client],[self.__client],[self.__client])        
-        self.recv()
+        self.__readables , self.__writables , exceptionals = select.select([self.__client],[self.__client],[self.__client])
+        try:
+            self.recv()
+        except Exception as e:
+            print e

@@ -94,12 +94,14 @@ class server(object):
 
     def __handle_income(self,soc):
         data = soc.recv(ServerConfig.RECV_SIZE)
-        print data
         soc_id = self.__connections.keys()[self.__connections.values().index(soc)]
-        if data[0] == "~":
-            if self.__isValid(data[1:]):
-                for soc_id in self.__connections.keys():
-                    self.__push_msg(self.__wrap_msg(soc_id,data[1:]))
+        dst,msg = data.split('$')
+        print data
+        if int(dst) == 0:
+            if self.__isValid(data):
+                for s_id in self.__connections.keys():
+                    self.__push_msg(self.__wrap_msg(soc_id,str(s_id)+'$'+msg))
+                    print self.__wrap_msg(soc_id,str(s_id)+'$'+msg)
         if data == "BYE":
             self.__handle_close(soc_id)
             return
@@ -125,19 +127,29 @@ class server(object):
             readables , writables , exceptionals = select.select(inputs, inputs, inputs)
             if len(readables):
                 for soc in readables:
-                    if soc is self.__server:
-                        self.__handle_conn()
-                    else:
-                        self.__handle_income(soc)
+                    try:
+                        if soc is self.__server:
+                            self.__handle_conn()
+                        else:
+                            self.__handle_income(soc)
+                    except Exception as e:
+                        print e
             inputs = self.__connections.values()
             readables , writables , exceptionals = select.select(inputs, inputs, inputs)
             if len(writables):
                 for soc in writables:
-                    self.__handle_outcome(soc)
-                    
+                    try:
+                        self.__handle_outcome(soc)
+                    except Exception as e:
+                        print e
+            readables , writables , exceptionals = select.select(inputs, inputs, inputs)
+            if len(exceptionals):
+                for soc in exceptionals:
+                    try:
+                        self.__handle_close(self.__connections.keys()[self.__connections.values().index(soc)])
+                    except Exception as e:
+                        print e
             
-            
-
 if __name__ == "__main__":
     s = server()
     s.run()

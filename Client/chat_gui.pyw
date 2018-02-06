@@ -78,35 +78,35 @@ class Client:
             if not ok:print "error"
             return ok
     def conn_btn_event(self):
-        ip,port = self.ip_tb.get(),self.ip_tb1.get()
-        if self.isvalid(val = (ip,port),mode = 'addr'):
-            self.__client.setname(sys.argv[1])
-            self.__client.connect(str(ip),int(port))
-            self.output("ok")
-            self.cur_lst = []
-            while len(self.cur_lst):
-                del self.cur_lst[0]
-            self.dis_btn.configure(state = NORMAL)
-            self.conn_btn.configure(state = DISABLED)
-            self.start_thread = threading.Thread(target = self.run)
-            self.start_thread.start()
-            self.update_names()
-
-            
-            
+        try:
+            ip,port = self.ip_tb.get(),self.ip_tb1.get()
+            if self.isvalid(val = (ip,port),mode = 'addr'):
+                self.__client.setname(sys.argv[1])
+                self.__client.connect(str(ip),int(port))
+                self.output("ok")
+                self.cur_lst = []
+                while len(self.cur_lst):
+                    del self.cur_lst[0]              
+                self.dis_btn.configure(state = NORMAL)
+                self.conn_btn.configure(state = DISABLED)
+                self.start_thread = threading.Thread(target = self.run)
+                self.start_thread.start()
+                self.update_names()
+        except Exception as e:
+            print e
     def dis_btn_event(self):
-        print "discnnect"
-        self.__client.close()
-        self.remove_names()
-        self.output("bye")
+        if self.__client.isConnected():
+            print "discnnect"
+            self.__client.close()
+            self.remove_names()
+            self.output("bye")
 
-        self.dis_btn.configure(state = DISABLED)
+            self.dis_btn.configure(state = DISABLED)
 
-        self.conn_btn.configure(state = NORMAL)
+            self.conn_btn.configure(state = NORMAL)
         
     def clientlst_event(self,par):
         try:
-            
             self.__selected_cl = self.clientlst.curselection()
         except e:
             print e
@@ -114,9 +114,9 @@ class Client:
     def output(self,txt):
         self.chat.insert('end',"\n"+txt)
     def send_btn_event(self):
-        
-        soc_id = self.__client.name_to_id(self.clientlst.get(self.__selected_cl))
-        self.__client.send(soc_id,self.__msgvar.get())
+        if self.__client.isConnected():
+            soc_id = self.__client.name_to_id(self.clientlst.get(self.__selected_cl))
+            self.__client.send(soc_id,self.__msgvar.get())
     def dirMaker(self):
         
         if self.__lenofcl > len(self.cur_lst):
@@ -126,17 +126,13 @@ class Client:
     def update_names(self):
         
         self.__online_cl = self.__client.get_aliveClients()
+        self.__online_cl['0'] = "Broadcast"
         to_remove = [k for k in self.cur_lst if k not in self.__online_cl.values()]
         to_add = [k for k in self.__online_cl.values() if k not in self.cur_lst]
-        #remove
-
         #add
         for k in to_add:
             self.clientlst.insert(END,k)
             self.cur_lst.append(k)
-
-        
-        
         for k in to_remove:
             try:
                 self.clientlst.delete(self.cur_lst.index(k))            
@@ -397,7 +393,7 @@ class ScrolledListBox(AutoScroll, Listbox):
         AutoScroll.__init__(self, master)
 
 if __name__ == '__main__':
-    sys.argv = ["chat_gui.pyw","ori"]
+    sys.argv = ['chat_gui.pyw','ben']
     vp_start_gui()
 
 
